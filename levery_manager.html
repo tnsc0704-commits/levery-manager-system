@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Levery Manager System</title>
+<style>
+
+body {
+  font-family: sans-serif;
+  background: #e9eef5;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  transition: 0.3s;
+}
+.dark { background: #111827; color: white; }
+
+.widget {
+  width: 100%;
+  max-width: 460px;
+  min-height: 100vh;
+  background: white;
+  padding: 20px 20px 100px;
+  box-sizing: border-box;
+  position: relative;
+  transition: 0.3s;
+}
+.dark .widget { background: #1f2937; }
+
+.top-right {
+  position: absolute;
+  top: 15px; right: 15px;
+  display: flex; gap: 8px; z-index: 10;
+}
+.top-right button {
+  width: 36px; height: 36px;
+  border: none; border-radius: 50%;
+  background: #2563eb; color: white;
+  cursor: pointer; display: flex;
+  justify-content: center; align-items: center;
+  padding: 0; font-size: 16px;
+}
+
+.logo-wrap {
+  width: 100%; display: flex;
+  justify-content: center; align-items: center;
+  margin-bottom: 10px; height: 40px;
+}
+.logo {
+  font-size: 28px; font-weight: bold;
+  font-family: "Times New Roman", serif;
+  color: #000; cursor: pointer; transition: 0.3s;
+}
+.dark .logo { color: white; }
+
+h1 { text-align: center; font-size: 20px; margin: 10px 0 20px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+.task-box, .contact-box {
+  display: flex; flex-direction: column;
+  gap: 12px; margin-bottom: 20px;
+}
+
+input, textarea, select {
+  width: 100%; padding: 12px;
+  border-radius: 12px; border: 1px solid #ccc;
+  font-size: 14px; box-sizing: border-box;
+  font-family: inherit; transition: 0.3s;
+  color: #111827; background: white;
+}
+.dark input, .dark textarea, .dark select {
+  background: #111827; color: white; border: 1px solid #444;
+}
+textarea { resize: vertical; line-height: 1.5; min-height: 70px; }
+#taskInput { min-height: 180px; }
+
+/* 날짜 선택 행 */
+.date-row {
+  display: flex; gap: 8px;
+}
+.date-row select {
+  flex: 1;
+  padding: 12px 8px;
+}
+
+button {
+  padding: 12px; border: none; border-radius: 12px;
+  background: #2563eb; color: white;
+  cursor: pointer; font-size: 14px; transition: 0.2s;
+}
+button:active { transform: scale(0.95); }
+
+.list { list-style: none; padding: 0; margin: 0; }
+
+.item {
+  background: #f3f4f6; padding: 14px;
+  border-radius: 14px; margin-bottom: 12px; transition: 0.3s;
+}
+.dark .item { background: #374151; }
+
+.task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.task-check {
+  flex-shrink: 0;
+  width: 18px !important;
+  height: 18px;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  margin-top: 3px;
+  cursor: pointer;
+  box-sizing: content-box;
+}
+
+.task-main { flex: 1; min-width: 0; overflow: hidden; }
+
+.task-top {
+  display: flex; align-items: center;
+  gap: 6px; flex-wrap: wrap;
+}
+
+.task-title {
+  font-size: 15px; font-weight: bold;
+  word-break: break-word; color: #111827;
+}
+.dark .task-title { color: #f9fafb; }
+
+.task-preview {
+  font-size: 12px; color: #4b5563;
+  margin-top: 6px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  width: 100%; line-height: 1.4;
+}
+.dark .task-preview { color: #d1d5db; }
+
+.done { text-decoration: line-through; opacity: 0.5; }
+
+.small {
+  font-size: 12px; color: #4b5563;
+  margin-top: 4px; line-height: 1.5; word-break: break-word;
+}
+.dark .small { color: #d1d5db; }
+
+/* 날짜 뱃지 */
+.date-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+.dark .date-badge { background: #1e3a5f; color: #93c5fd; }
+.date-badge.today { background: #dcfce7; color: #15803d; }
+.dark .date-badge.today { background: #14532d; color: #86efac; }
+.date-badge.past { background: #fee2e2; color: #b91c1c; opacity: 0.7; }
+.dark .date-badge.past { background: #450a0a; color: #fca5a5; }
+
+/* 액션 버튼 */
+.action-buttons {
+  display: flex; flex-direction: column;
+  gap: 6px; flex-shrink: 0; width: 54px;
+}
+.action-buttons button {
+  width: 54px !important;
+  padding: 7px 0 !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+  box-sizing: border-box;
+}
+.delete-btn { background: #ef4444 !important; }
+.save-contact-btn { background: #10b981 !important; }
+.edit-btn { background: #f59e0b !important; }
+
+.phone-link, .email-link {
+  color: #2563eb; text-decoration: none;
+  font-weight: bold; word-break: break-all;
+}
+.dark .phone-link, .dark .email-link { color: #60a5fa; }
+
+/* NAV */
+.navbar {
+  position: fixed; bottom: 0; left: 0;
+  width: 100%; display: flex;
+  justify-content: center; background: #fff;
+  border-top: 1px solid #ddd; padding: 10px 0;
+  transition: 0.3s; z-index: 999;
+}
+.dark .navbar { background: #111827; border-top: 1px solid #333; }
+.nav-inner { display: flex; gap: 16px; }
+
+.nav-btn {
+  background: #f3f4f6 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 14px !important;
+  padding: 10px 14px !important;
+  display: flex; flex-direction: column;
+  align-items: center; font-size: 11px !important;
+  min-width: 68px; cursor: pointer;
+  transition: 0.2s; width: auto !important;
+  color: #111827;
+}
+.dark .nav-btn { background: #1f2937 !important; color: white; border: 1px solid #333 !important; }
+.nav-btn.active { background: #2563eb !important; color: white !important; border-color: #2563eb !important; }
+
+/* MODAL */
+.modal {
+  display: none; position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center; align-items: center;
+  z-index: 9999; padding: 15px; box-sizing: border-box;
+}
+.modal-box {
+  background: white; padding: 20px; border-radius: 16px;
+  width: 100%; max-width: 400px; box-sizing: border-box;
+  max-height: 90vh; overflow-y: auto;
+}
+.dark .modal-box { background: #1f2937; color: white; }
+#dText { margin: 15px 0; line-height: 1.7; white-space: pre-wrap; }
+
+.search-toggle-btn { width: 100%; margin-bottom: 10px; background: #1d4ed8; }
+.search-area { max-height: 0; overflow: hidden; transition: 0.3s; }
+.search-area.active { max-height: 100px; margin-bottom: 15px; }
+.search-row { display: flex; gap: 8px; }
+.search-row select { width: 100px; flex-shrink: 0; }
+.search-row input { flex: 1; }
+.contact-row { display: flex; gap: 8px; }
+.contact-row input { flex: 1; }
+
+/* ───── 캘린더 ───── */
+.cal-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 14px;
+}
+.cal-header button {
+  padding: 8px 14px !important;
+  font-size: 18px !important;
+  width: auto !important;
+  border-radius: 10px !important;
+}
+.cal-title { font-size: 18px; font-weight: bold; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.cal-day-label {
+  text-align: center; font-size: 11px;
+  font-weight: bold; padding: 4px 0;
+  color: #6b7280;
+}
+.dark .cal-day-label { color: #9ca3af; }
+.cal-day-label.sun { color: #ef4444; }
+.cal-day-label.sat { color: #3b82f6; }
+
+.cal-cell {
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 44px;
+  position: relative;
+  transition: 0.15s;
+}
+.cal-cell:hover { background: #e0e7ff; }
+.dark .cal-cell:hover { background: #374151; }
+.cal-cell.empty { cursor: default; }
+.cal-cell.today-cell {
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+}
+.cal-cell.today-cell:hover { background: #1d4ed8; }
+.cal-cell.has-task::after {
+  content: '';
+  display: block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+  margin: 2px auto 0;
+}
+.cal-cell.today-cell.has-task::after { background: #fde68a; }
+.cal-cell.sun-col { color: #ef4444; }
+.cal-cell.sat-col { color: #3b82f6; }
+.dark .cal-cell.sun-col { color: #fca5a5; }
+.dark .cal-cell.sat-col { color: #93c5fd; }
+
+/* 캘린더 하단 일정 목록 */
+.cal-task-list { margin-top: 8px; }
+.cal-task-date-header {
+  font-size: 13px; font-weight: bold;
+  color: #2563eb; margin: 14px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #dbeafe;
+}
+.dark .cal-task-date-header { color: #93c5fd; border-bottom-color: #1e3a5f; }
+
+.cal-task-item {
+  background: #f3f4f6; border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+  font-size: 13px; transition: 0.3s;
+}
+.dark .cal-task-item { background: #374151; }
+.cal-task-item.done-item { opacity: 0.5; text-decoration: line-through; }
+
+.selected-cell {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+.dark .selected-cell { background: #1e3a5f !important; color: #93c5fd !important; }
+
+</style>
+</head>
+
+<body class="dark">
+<div class="widget">
+
+  <div class="top-right">
+    <button onclick="toggleDark()">🌙</button>
+    <button onclick="toggleLang()">🌐</button>
+  </div>
+
+  <div class="logo-wrap">
+    <div class="logo" onclick="setTab('tasks',event)">LEVERY</div>
+  </div>
+
+  <h1 id="title">업무</h1>
+
+  <!-- ── 업무 탭 ── -->
+  <div id="tasks" class="section active">
+    <div class="task-box">
+      <input id="titleInput" placeholder="제목 입력">
+      <textarea id="taskInput" placeholder="업무 내용 상세 입력"></textarea>
+
+      <!-- 날짜 선택 -->
+      <div class="date-row">
+        <select id="selYear"></select>
+        <select id="selMonth"></select>
+        <select id="selDay"></select>
+      </div>
+
+      <select id="assignee">
+        <option>김기호 대리</option>
+        <option>양재국 팀장</option>
+        <option>박도엽 주임</option>
+      </select>
+      <button id="taskBtn" onclick="addTask()">업무 추가</button>
+    </div>
+    <ul id="taskList" class="list"></ul>
+  </div>
+
+  <!-- ── 캘린더 탭 ── -->
+  <div id="calendar" class="section">
+    <div class="cal-header">
+      <button onclick="calMove(-1)">‹</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button onclick="calMove(1)">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-task-list" id="calTaskList"></div>
+  </div>
+
+  <!-- ── 연락처 탭 ── -->
+  <div id="contacts" class="section">
+    <div class="contact-box">
+      <div class="contact-row">
+        <input id="cName" placeholder="이름">
+        <input id="cPosition" placeholder="직급">
+        <input id="cCompany" placeholder="회사명">
+      </div>
+      <input id="cPhone" placeholder="전화번호">
+      <input id="cEmail" placeholder="이메일">
+      <textarea id="cMemo" placeholder="메모"></textarea>
+      <button id="contactBtn" onclick="addContact()">연락처 저장</button>
+    </div>
+    <button class="search-toggle-btn" onclick="toggleSearchBox()">🔍 연락처 검색</button>
+    <div id="searchArea" class="search-area">
+      <div class="search-row">
+        <select id="searchType">
+          <option value="name">이름</option>
+          <option value="company">회사명</option>
+        </select>
+        <input id="searchInput" placeholder="검색어 입력" oninput="renderContacts()">
+      </div>
+    </div>
+    <ul id="contactList" class="list"></ul>
+  </div>
+
+</div>
+
+<!-- NAV -->
+<div class="navbar">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="setTab('tasks',event)">
+      📋<div id="taskTabText">업무</div>
+    </button>
+    <button class="nav-btn" onclick="setTab('calendar',event)">
+      📅<div id="calTabText">캘린더</div>
+    </button>
+    <button class="nav-btn" onclick="setTab('contacts',event)">
+      📇<div id="contactTabText">연락처</div>
+    </button>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="modal">
+  <div class="modal-box" style="max-width:300px;text-align:center;">
+    <div id="confirmMsg" style="font-size:15px;margin-bottom:20px;line-height:1.6;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="confirmYesBtn" style="background:#ef4444;flex:1;padding:10px;">삭제</button>
+      <button id="confirmNoBtn" style="background:#6b7280;flex:1;padding:10px;" onclick="closeConfirm()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div id="detailModal" class="modal">
+  <div class="modal-box">
+    <h2 id="dTitle"></h2>
+    <div id="dText"></div>
+    <div id="dAssignee" class="small"></div>
+    <div id="dDate" class="small"></div>
+    <br>
+    <button onclick="closeDetail()">닫기</button>
+  </div>
+</div>
+
+<script>
+/* ── 커스텀 확인 모달 ── */
+let confirmCallback = null;
+function showConfirm(msg, cb) {
+  confirmCallback = cb;
+  document.getElementById('confirmMsg').innerText = msg;
+  document.getElementById('confirmModal').style.display = 'flex';
+  document.getElementById('confirmYesBtn').onclick = function() {
+    closeConfirm();
+    if (confirmCallback) confirmCallback();
+  };
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').style.display = 'none';
+  confirmCallback = null;
+}
+
+/* ── 기본 상태 ── */
+let lang = 'ko';
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+let editId = null;
+
+function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+function saveContacts() { localStorage.setItem('contacts', JSON.stringify(contacts)); }
+
+/* ── 번역 ── */
+const t = {
+  ko: { taskTitle:"업무", contactTitle:"연락처", calTitle:"캘린더", titleInput:"제목 입력", task:"업무 내용 상세 입력", taskBtn:"업무 추가", contactBtn:"연락처 저장", contactEditBtn:"연락처 수정완료", search:"검색어 입력", name:"이름", position:"직급", company:"회사명", phone:"전화번호", email:"이메일", memo:"메모" },
+  en: { taskTitle:"Work", contactTitle:"Contacts", calTitle:"Calendar", titleInput:"Title", task:"Task Details", taskBtn:"Add Task", contactBtn:"Save Contact", contactEditBtn:"Update Contact", search:"Search", name:"Name", position:"Position", company:"Company", phone:"Phone", email:"Email", memo:"Memo" }
+};
+
+function toggleLang() {
+  lang = lang === 'ko' ? 'en' : 'ko';
+  applyLang(); renderContacts(); renderTasks(); renderCalendar();
+}
+
+function applyLang() {
+  const currentTab = document.querySelector('.section.active').id;
+  const titles = { tasks: t[lang].taskTitle, calendar: t[lang].calTitle, contacts: t[lang].contactTitle };
+  document.getElementById('title').innerText = titles[currentTab] || t[lang].taskTitle;
+  document.getElementById('titleInput').placeholder = t[lang].titleInput;
+  document.getElementById('taskInput').placeholder = t[lang].task;
+  document.getElementById('taskBtn').innerText = t[lang].taskBtn;
+  document.getElementById('searchInput').placeholder = t[lang].search;
+  document.getElementById('cName').placeholder = t[lang].name;
+  document.getElementById('cPosition').placeholder = t[lang].position;
+  document.getElementById('cCompany').placeholder = t[lang].company;
+  document.getElementById('cPhone').placeholder = t[lang].phone;
+  document.getElementById('cEmail').placeholder = t[lang].email;
+  document.getElementById('cMemo').placeholder = t[lang].memo;
+  document.getElementById('taskTabText').innerText = t[lang].taskTitle;
+  document.getElementById('calTabText').innerText = t[lang].calTitle;
+  document.getElementById('contactTabText').innerText = t[lang].contactTitle;
+  document.getElementById('contactBtn').innerText = editId ? t[lang].contactEditBtn : t[lang].contactBtn;
+}
+applyLang();
+
+function toggleDark() { document.body.classList.toggle('dark'); }
+function toggleSearchBox() { document.getElementById('searchArea').classList.toggle('active'); }
+
+function setTab(id, e) {
+  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const titles = { tasks: t[lang].taskTitle, calendar: t[lang].calTitle, contacts: t[lang].contactTitle };
+  document.getElementById('title').innerText = titles[id] || '';
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (e) e.currentTarget.classList.add('active');
+  if (id === 'calendar') renderCalendar();
+}
+
+/* ── 날짜 셀렉트 초기화 ── */
+function initDateSelects() {
+  const now = new Date();
+  const yEl = document.getElementById('selYear');
+  const mEl = document.getElementById('selMonth');
+  const dEl = document.getElementById('selDay');
+
+  // 년도: 올해 ~ +2년
+  for (let y = now.getFullYear(); y <= now.getFullYear() + 2; y++) {
+    const o = document.createElement('option');
+    o.value = y; o.text = y + '년';
+    yEl.appendChild(o);
+  }
+  // 월
+  for (let m = 1; m <= 12; m++) {
+    const o = document.createElement('option');
+    o.value = m; o.text = m + '월';
+    mEl.appendChild(o);
+  }
+  mEl.value = now.getMonth() + 1;
+
+  // 일은 년/월 바뀔 때마다 갱신
+  function updateDays() {
+    const y = parseInt(yEl.value);
+    const m = parseInt(mEl.value);
+    const max = new Date(y, m, 0).getDate();
+    const prev = parseInt(dEl.value) || now.getDate();
+    dEl.innerHTML = '';
+    for (let d = 1; d <= max; d++) {
+      const o = document.createElement('option');
+      o.value = d; o.text = d + '일';
+      dEl.appendChild(o);
+    }
+    dEl.value = Math.min(prev, max);
+  }
+  yEl.addEventListener('change', updateDays);
+  mEl.addEventListener('change', updateDays);
+  updateDays();
+  dEl.value = now.getDate();
+}
+initDateSelects();
+
+/* ── 선택된 날짜 가져오기 ── */
+function getSelectedDate() {
+  const y = document.getElementById('selYear').value;
+  const m = String(document.getElementById('selMonth').value).padStart(2, '0');
+  const d = String(document.getElementById('selDay').value).padStart(2, '0');
+  return `${y}-${m}-${d}`; // YYYY-MM-DD
+}
+
+function todayStr() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+/* ── 업무 ── */
+function addTask() {
+  const title = titleInput.value.trim();
+  if (!title) { alert('제목 입력해라'); return; }
+  tasks.push({
+    id: Date.now(), title,
+    text: taskInput.value,
+    assignee: assignee.value,
+    date: getSelectedDate(),
+    done: false, doneAt: ''
+  });
+  saveTasks();
+  titleInput.value = ''; taskInput.value = '';
+  renderTasks();
+}
+
+function toggleDone(id) {
+  let task = tasks.find(x => x.id === id);
+  if (!task) return;
+  task.done = !task.done;
+  task.doneAt = task.done ? new Date().toLocaleString() : '';
+  saveTasks(); renderTasks();
+}
+
+function deleteTask(id) {
+  showConfirm('업무를 삭제할까요?', () => {
+    tasks = tasks.filter(x => x.id !== id);
+    saveTasks(); renderTasks();
+  });
+}
+
+function openDetail(id) {
+  const task = tasks.find(x => x.id === id);
+  if (!task) return;
+  dTitle.innerText = task.title;
+  dText.innerText = task.text || '내용 없음';
+  dAssignee.innerText = '담당자 : ' + task.assignee;
+  const dateInfo = task.date ? ' | 날짜 : ' + task.date : '';
+  dDate.innerText = (task.doneAt ? '완료일 : ' + task.doneAt : '진행중') + dateInfo;
+  detailModal.style.display = 'flex';
+}
+function closeDetail() { detailModal.style.display = 'none'; }
+window.onclick = function(e) { if (e.target === detailModal) closeDetail(); };
+
+function dateBadgeClass(dateStr) {
+  if (!dateStr) return '';
+  const today = todayStr();
+  if (dateStr === today) return 'today';
+  if (dateStr < today) return 'past';
+  return '';
+}
+
+function renderTasks() {
+  taskList.innerHTML = '';
+  const today = todayStr();
+
+  // 오늘 이후 날짜 업무만 보이게 (오늘 포함), 과거는 흐리게 표시
+  [...tasks].sort((a, b) => {
+    if (a.done !== b.done) return a.done - b.done;
+    return (a.date || '') < (b.date || '') ? -1 : 1;
+  }).forEach(task => {
+    const li = document.createElement('li');
+    li.className = 'item';
+
+    const badgeCls = dateBadgeClass(task.date);
+    const badgeLabel = task.date
+      ? `<span class="date-badge ${badgeCls}">${task.date}</span>`
+      : '';
+
+    li.innerHTML = `
+      <div class="task-row">
+        <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onclick="toggleDone(${task.id})">
+        <div class="task-main">
+          <div class="task-top">
+            <div class="task-title ${task.done ? 'done' : ''}">${task.title}</div>
+            <div class="small">/ ${task.assignee}</div>
+          </div>
+          ${badgeLabel}
+          <div class="task-preview">${task.text ? task.text.replace(/\n/g, ' ') : '내용 없음'}</div>
+          ${task.doneAt ? `<div class="small">완료 : ${task.doneAt}</div>` : ''}
+        </div>
+        <div class="action-buttons">
+          <button onclick="openDetail(${task.id})">보기</button>
+          <button class="delete-btn" onclick="deleteTask(${task.id})">삭제</button>
+        </div>
+      </div>`;
+    taskList.appendChild(li);
+  });
+}
+
+/* ── 캘린더 ── */
+let calYear, calMonth, calSelectedDate = null;
+
+(function initCal() {
+  const n = new Date();
+  calYear = n.getFullYear();
+  calMonth = n.getMonth(); // 0-based
+})();
+
+function calMove(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const titleEl = document.getElementById('calTitle');
+
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  titleEl.innerText = `${calYear}년 ${monthNames[calMonth]}`;
+
+  grid.innerHTML = '';
+
+  // 요일 헤더
+  const dayLabels = ['일','월','화','수','목','금','토'];
+  const labelCls  = ['sun','','','','','','sat'];
+  dayLabels.forEach((d, i) => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label ' + labelCls[i];
+    el.innerText = d;
+    grid.appendChild(el);
+  });
+
+  // 이번 달 일정 날짜 set
+  const taskDates = new Set(
+    tasks.filter(tk => !tk.done).map(tk => tk.date).filter(Boolean)
+  );
+
+  const today = todayStr();
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  // 빈칸
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    const dow = (firstDay + d - 1) % 7;
+
+    let cls = 'cal-cell';
+    if (dateStr === today) cls += ' today-cell';
+    if (dateStr === calSelectedDate) cls += ' selected-cell';
+    if (taskDates.has(dateStr)) cls += ' has-task';
+    if (dow === 0) cls += ' sun-col';
+    if (dow === 6) cls += ' sat-col';
+
+    el.className = cls;
+    el.innerText = d;
+    el.onclick = () => selectCalDate(dateStr);
+    grid.appendChild(el);
+  }
+
+  renderCalTaskList();
+}
+
+function selectCalDate(dateStr) {
+  calSelectedDate = calSelectedDate === dateStr ? null : dateStr;
+  renderCalendar();
+}
+
+function renderCalTaskList() {
+  const el = document.getElementById('calTaskList');
+  el.innerHTML = '';
+
+  // 선택된 날짜가 있으면 그 날만, 없으면 이번 달 전체
+  let filtered;
+  const prefix = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
+
+  if (calSelectedDate) {
+    filtered = tasks.filter(tk => tk.date === calSelectedDate);
+  } else {
+    filtered = tasks.filter(tk => tk.date && tk.date.startsWith(prefix));
+  }
+
+  filtered.sort((a, b) => (a.date || '') < (b.date || '') ? -1 : 1);
+
+  if (filtered.length === 0) {
+    el.innerHTML = `<div class="small" style="text-align:center;margin-top:12px;opacity:0.5">일정 없음</div>`;
+    return;
+  }
+
+  // 날짜별 그루핑
+  const grouped = {};
+  filtered.forEach(tk => {
+    const key = tk.date || '날짜 미정';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(tk);
+  });
+
+  Object.keys(grouped).sort().forEach(date => {
+    const header = document.createElement('div');
+    header.className = 'cal-task-date-header';
+    const isToday = date === todayStr();
+    header.innerText = date + (isToday ? ' (오늘)' : '');
+    el.appendChild(header);
+
+    grouped[date].forEach(tk => {
+      const item = document.createElement('div');
+      item.className = 'cal-task-item' + (tk.done ? ' done-item' : '');
+      item.innerHTML = `
+        <b>${tk.title}</b>
+        <div class="small">담당 : ${tk.assignee}</div>
+        ${tk.text ? `<div class="small">${tk.text.replace(/\n/g,' ')}</div>` : ''}
+      `;
+      el.appendChild(item);
+    });
+  });
+}
+
+/* ── 연락처 ── */
+function addContact() {
+  const name = cName.value.trim();
+  if (!name) { alert('이름 입력해라'); return; }
+  const contact = { id: editId || Date.now(), name, position: cPosition.value.trim(), company: cCompany.value.trim(), phone: cPhone.value.trim(), email: cEmail.value.trim(), memo: document.getElementById('cMemo').value.trim() };
+  if (editId) { contacts = contacts.map(c => c.id === editId ? contact : c); editId = null; }
+  else { contacts.push(contact); }
+  saveContacts();
+  cName.value = ''; cPosition.value = ''; cCompany.value = ''; cPhone.value = ''; cEmail.value = '';
+  document.getElementById('cMemo').value = '';
+  document.getElementById('contactBtn').innerText = t[lang].contactBtn;
+  renderContacts();
+}
+
+function editContact(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  cName.value = c.name || ''; cPosition.value = c.position || ''; cCompany.value = c.company || '';
+  cPhone.value = c.phone || ''; cEmail.value = c.email || '';
+  document.getElementById('cMemo').value = c.memo || '';
+  editId = id;
+  document.getElementById('contactBtn').innerText = t[lang].contactEditBtn;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deleteContact(id) {
+  showConfirm('연락처를 삭제할까요?', () => {
+    contacts = contacts.filter(c => c.id !== id);
+    saveContacts(); renderContacts();
+  });
+}
+
+function saveToPhone(contact) {
+  const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${contact.name}\nORG:${contact.company}\nTITLE:${contact.position}\nTEL:${contact.phone}\nEMAIL:${contact.email}\nNOTE:${contact.memo}\nEND:VCARD`;
+  const blob = new Blob([vcard], { type: 'text/vcard' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `${contact.name}.vcf`; a.click();
+}
+
+function renderContacts() {
+  contactList.innerHTML = '';
+  const keyword = (searchInput.value || '').toLowerCase();
+  const type = searchType.value;
+  contacts.filter(c => !keyword || (c[type] || '').toLowerCase().includes(keyword))
+    .slice().reverse().forEach(c => {
+      const li = document.createElement('li');
+      li.className = 'item';
+      li.innerHTML = `
+        <div class="task-row">
+          <div class="task-main">
+            <b>${c.name}</b>
+            <div class="small">${c.position || '-'}</div>
+            <div class="small">${c.company || '-'}</div>
+            <div class="small"><a class="phone-link" href="tel:${c.phone}">${c.phone || '-'}</a></div>
+            <div class="small"><a class="email-link" href="mailto:${c.email}">${c.email || '-'}</a></div>
+            <div class="small">${(c.memo || '-').replace(/\n/g, '<br>')}</div>
+          </div>
+          <div class="action-buttons">
+            <button class="edit-btn" onclick="editContact(${c.id})">수정</button>
+            <button class="save-contact-btn" onclick='saveToPhone(${JSON.stringify(c)})'>저장</button>
+            <button class="delete-btn" onclick="deleteContact(${c.id})">삭제</button>
+          </div>
+        </div>`;
+      contactList.appendChild(li);
+    });
+}
+
+renderTasks();
+renderContacts();
+</script>
+</body>
+</html>

@@ -466,9 +466,11 @@ function showConfirm(msg, cb) {
   confirmCallback = cb;
   document.getElementById('confirmMsg').innerText = msg;
   document.getElementById('confirmModal').style.display = 'flex';
-  document.getElementById('confirmYesBtn').onclick = function() {
+  document.getElementById('confirmYesBtn').onclick = function(e) {
+    e.stopPropagation();
+    const fn = confirmCallback;
     closeConfirm();
-    if (confirmCallback) confirmCallback();
+    if (fn) fn();
   };
 }
 function closeConfirm() {
@@ -611,15 +613,8 @@ function toggleDone(id) {
 
 function deleteTask(id) {
   showConfirm('업무를 삭제할까요?', () => {
-    // window.tasks를 명시하거나, 확실하게 let으로 선언된 배열임을 보장
-    tasks = tasks.filter(task => task.id !== id);
-    saveTasks(); 
-    renderTasks();
-    
-    // 만약 캘린더 탭에 있다면 캘린더도 갱신
-    if (document.getElementById('calendar').classList.contains('active')) {
-      renderCalendar();
-    }
+    tasks = tasks.filter(x => x.id !== id);
+    saveTasks(); renderTasks();
   });
 }
 
@@ -634,7 +629,11 @@ function openDetail(id) {
   detailModal.style.display = 'flex';
 }
 function closeDetail() { detailModal.style.display = 'none'; }
-window.onclick = function(e) { if (e.target === detailModal) closeDetail(); };
+window.onclick = function(e) {
+  if (e.target === detailModal) closeDetail();
+  if (e.target === document.getElementById('confirmModal')) closeConfirm();
+  if (e.target === document.getElementById('todayModal')) closeTodayModal();
+};
 
 function dateBadgeClass(dateStr) {
   if (!dateStr) return '';
@@ -877,6 +876,14 @@ function renderContacts() {
 
 renderTasks();
 renderContacts();
+
+/* ── 서비스워커 등록 ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log('SW 등록됨', reg))
+    .catch(err => console.log('SW 실패', err));
+}
+
 
 /* ── 오늘 일정 팝업 ── */
 function showTodayPopup() {

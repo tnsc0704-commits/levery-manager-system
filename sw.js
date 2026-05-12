@@ -1,4 +1,4 @@
-const CACHE_NAME = 'levery-v1';
+const CACHE_NAME = 'levery-v2';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

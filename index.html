@@ -3,36 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Levery Manager System</title>
+<title>Levery Manager</title>
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Levery">
 <link rel="manifest" href="manifest.json">
-
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: sans-serif;
   background: #e9eef5;
-  margin: 0;
   display: flex;
   justify-content: center;
+  min-height: 100vh;
   transition: 0.3s;
 }
 .dark { background: #111827; color: white; }
 
-.widget {
+/* ── 로그인 화면 ── */
+#loginScreen {
+  width: 100%;
+  max-width: 400px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 24px;
+}
+#loginScreen.hidden { display: none; }
+
+.login-logo {
+  font-size: 36px;
+  font-weight: bold;
+  font-family: "Times New Roman", serif;
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+.login-sub {
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 40px;
+}
+.dark .login-sub { color: #9ca3af; }
+
+.login-box {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.dark .login-box { background: #1f2937; }
+
+.login-tab {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 4px;
+}
+.dark .login-tab { background: #374151; }
+.login-tab button {
+  flex: 1;
+  padding: 8px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  border: none !important;
+  width: auto !important;
+}
+.login-tab button.active {
+  background: white !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.dark .login-tab button.active { background: #111827 !important; color: white !important; }
+
+.login-input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  background: #f9fafb;
+  color: #111827;
+  transition: 0.2s;
+}
+.dark .login-input { background: #111827; color: white; border-color: #374151; }
+.login-input:focus { outline: none; border-color: #2563eb; }
+
+.login-btn {
+  width: 100%;
+  padding: 14px !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  border-radius: 12px !important;
+  background: #2563eb !important;
+}
+.login-err {
+  font-size: 12px;
+  color: #ef4444;
+  text-align: center;
+  min-height: 16px;
+}
+
+/* ── 앱 화면 ── */
+#appScreen {
   width: 100%;
   max-width: 460px;
   min-height: 100vh;
   background: white;
   padding: 20px 20px 100px;
-  box-sizing: border-box;
   position: relative;
   transition: 0.3s;
 }
-.dark .widget { background: #1f2937; }
+#appScreen.hidden { display: none; }
+.dark #appScreen { background: #1f2937; }
 
 .top-right {
   position: absolute;
@@ -45,26 +137,34 @@ body {
   background: #2563eb; color: white;
   cursor: pointer; display: flex;
   justify-content: center; align-items: center;
-  padding: 0; font-size: 16px;
+  padding: 0; font-size: 15px;
 }
 
 .logo-wrap {
   width: 100%; display: flex;
   justify-content: center; align-items: center;
-  margin-bottom: 10px; height: 40px;
+  margin-bottom: 4px; height: 40px;
 }
 .logo {
   font-size: 28px; font-weight: bold;
   font-family: "Times New Roman", serif;
-  color: #000; cursor: pointer; transition: 0.3s;
+  color: #2563eb; cursor: pointer;
 }
-.dark .logo { color: white; }
 
-h1 { text-align: center; font-size: 20px; margin: 10px 0 20px; }
+.user-info {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 14px;
+}
+.dark .user-info { color: #9ca3af; }
+
+h1 { text-align: center; font-size: 20px; margin: 0 0 20px; }
 
 .section { display: none; }
 .section.active { display: block; }
 
+/* ── 폼 공통 ── */
 .task-box, .contact-box {
   display: flex; flex-direction: column;
   gap: 12px; margin-bottom: 20px;
@@ -72,35 +172,28 @@ h1 { text-align: center; font-size: 20px; margin: 10px 0 20px; }
 
 input, textarea, select {
   width: 100%; padding: 12px;
-  border-radius: 12px; border: 1px solid #ccc;
+  border-radius: 12px; border: 1px solid #e5e7eb;
   font-size: 14px; box-sizing: border-box;
   font-family: inherit; transition: 0.3s;
-  color: #111827; background: white;
+  color: #111827; background: #f9fafb;
 }
 .dark input, .dark textarea, .dark select {
   background: #111827; color: white; border: 1px solid #444;
 }
 textarea { resize: vertical; line-height: 1.5; min-height: 70px; }
-#taskInput { min-height: 180px; }
-
-/* 날짜 선택 행 */
-.date-row {
-  display: flex; gap: 8px;
-}
-.date-row select {
-  flex: 1;
-  padding: 12px 8px;
-}
+#taskInput { min-height: 140px; }
 
 button {
   padding: 12px; border: none; border-radius: 12px;
   background: #2563eb; color: white;
   cursor: pointer; font-size: 14px; transition: 0.2s;
 }
-button:active { transform: scale(0.95); }
+button:active { transform: scale(0.97); }
+
+.date-row { display: flex; gap: 8px; }
+.date-row select { flex: 1; padding: 12px 8px; }
 
 .list { list-style: none; padding: 0; margin: 0; }
-
 .item {
   background: #f3f4f6; padding: 14px;
   border-radius: 14px; margin-bottom: 12px; transition: 0.3s;
@@ -108,119 +201,68 @@ button:active { transform: scale(0.95); }
 .dark .item { background: #374151; }
 
 .task-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  width: 100%;
-  box-sizing: border-box;
+  display: flex; align-items: flex-start;
+  gap: 10px; width: 100%; box-sizing: border-box;
 }
-
 .task-check {
-  flex-shrink: 0;
-  width: 18px !important;
-  height: 18px;
-  padding: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  margin-top: 3px;
-  cursor: pointer;
-  box-sizing: content-box;
+  flex-shrink: 0; width: 18px !important; height: 18px;
+  padding: 0 !important; border: none !important;
+  background: transparent !important; margin-top: 3px;
+  cursor: pointer; box-sizing: content-box;
 }
-
 .task-main { flex: 1; min-width: 0; overflow: hidden; }
-
-.task-top {
-  display: flex; align-items: center;
-  gap: 6px; flex-wrap: wrap;
-}
-
-.task-title {
-  font-size: 15px; font-weight: bold;
-  word-break: break-word; color: #111827;
-}
+.task-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.task-title { font-size: 15px; font-weight: bold; word-break: break-word; color: #111827; }
 .dark .task-title { color: #f9fafb; }
-
 .task-preview {
-  font-size: 12px; color: #4b5563;
-  margin-top: 6px; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12px; color: #4b5563; margin-top: 6px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   width: 100%; line-height: 1.4;
 }
 .dark .task-preview { color: #d1d5db; }
-
 .done { text-decoration: line-through; opacity: 0.5; }
-
-.small {
-  font-size: 12px; color: #4b5563;
-  margin-top: 4px; line-height: 1.5; word-break: break-word;
-}
+.small { font-size: 12px; color: #4b5563; margin-top: 4px; line-height: 1.5; word-break: break-word; }
 .dark .small { color: #d1d5db; }
 
-/* 날짜 뱃지 */
 .date-badge {
-  display: inline-block;
-  background: #dbeafe;
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 2px 8px;
-  border-radius: 20px;
-  margin-top: 4px;
+  display: inline-block; background: #dbeafe; color: #1d4ed8;
+  font-size: 11px; font-weight: bold; padding: 2px 8px;
+  border-radius: 20px; margin-top: 4px;
 }
 .dark .date-badge { background: #1e3a5f; color: #93c5fd; }
 .date-badge.today { background: #dcfce7; color: #15803d; }
 .dark .date-badge.today { background: #14532d; color: #86efac; }
 .date-badge.past { background: #fee2e2; color: #b91c1c; opacity: 0.7; }
-.dark .date-badge.past { background: #450a0a; color: #fca5a5; }
 
-/* 액션 버튼 */
-.action-buttons {
-  display: flex; flex-direction: column;
-  gap: 6px; flex-shrink: 0; width: 54px;
-}
-.action-buttons button {
-  width: 54px !important;
-  padding: 7px 0 !important;
-  font-size: 11px !important;
-  border-radius: 8px !important;
-  box-sizing: border-box;
-}
+.action-buttons { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; width: 54px; }
+.action-buttons button { width: 54px !important; padding: 7px 0 !important; font-size: 11px !important; border-radius: 8px !important; }
 .delete-btn { background: #ef4444 !important; }
 .save-contact-btn { background: #10b981 !important; }
 .edit-btn { background: #f59e0b !important; }
 
-.phone-link, .email-link {
-  color: #2563eb; text-decoration: none;
-  font-weight: bold; word-break: break-all;
-}
+.phone-link, .email-link { color: #2563eb; text-decoration: none; font-weight: bold; word-break: break-all; }
 .dark .phone-link, .dark .email-link { color: #60a5fa; }
 
-/* NAV */
+/* ── NAV ── */
 .navbar {
   position: fixed; bottom: 0; left: 0;
-  width: 100%; display: flex;
-  justify-content: center; background: #fff;
-  border-top: 1px solid #ddd; padding: 10px 0;
-  transition: 0.3s; z-index: 999;
+  width: 100%; display: flex; justify-content: center;
+  background: #fff; border-top: 1px solid #e5e7eb;
+  padding: 10px 0; z-index: 999; transition: 0.3s;
 }
 .dark .navbar { background: #111827; border-top: 1px solid #333; }
-.nav-inner { display: flex; gap: 16px; }
-
+.nav-inner { display: flex; gap: 10px; }
 .nav-btn {
-  background: #f3f4f6 !important;
-  border: 1px solid #ddd !important;
-  border-radius: 14px !important;
-  padding: 10px 14px !important;
-  display: flex; flex-direction: column;
-  align-items: center; font-size: 11px !important;
-  min-width: 68px; cursor: pointer;
-  transition: 0.2s; width: auto !important;
-  color: #111827;
+  background: #f3f4f6 !important; border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important; padding: 8px 12px !important;
+  display: flex; flex-direction: column; align-items: center;
+  font-size: 10px !important; min-width: 60px; cursor: pointer;
+  transition: 0.2s; width: auto !important; color: #111827;
 }
 .dark .nav-btn { background: #1f2937 !important; color: white; border: 1px solid #333 !important; }
 .nav-btn.active { background: #2563eb !important; color: white !important; border-color: #2563eb !important; }
 
-/* MODAL */
+/* ── MODAL 공통 ── */
 .modal {
   display: none; position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -245,132 +287,215 @@ button:active { transform: scale(0.95); }
 .contact-row { display: flex; gap: 8px; }
 .contact-row input { flex: 1; }
 
-/* ───── 캘린더 ───── */
-.cal-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 14px;
-}
-.cal-header button {
-  padding: 8px 14px !important;
-  font-size: 18px !important;
-  width: auto !important;
-  border-radius: 10px !important;
-}
+/* ── 캘린더 ── */
+.cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.cal-header button { padding: 8px 14px !important; font-size: 18px !important; width: auto !important; border-radius: 10px !important; }
 .cal-title { font-size: 18px; font-weight: bold; }
-
-.cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 16px;
-}
-.cal-day-label {
-  text-align: center; font-size: 11px;
-  font-weight: bold; padding: 4px 0;
-  color: #6b7280;
-}
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px; }
+.cal-day-label { text-align: center; font-size: 11px; font-weight: bold; padding: 4px 0; color: #6b7280; }
 .dark .cal-day-label { color: #9ca3af; }
 .cal-day-label.sun { color: #ef4444; }
 .cal-day-label.sat { color: #3b82f6; }
-
-.cal-cell {
-  text-align: center;
-  padding: 6px 2px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  min-height: 44px;
-  position: relative;
-  transition: 0.15s;
-}
+.cal-cell { text-align: center; padding: 6px 2px; border-radius: 10px; cursor: pointer; font-size: 13px; min-height: 44px; position: relative; transition: 0.15s; }
 .cal-cell:hover { background: #e0e7ff; }
 .dark .cal-cell:hover { background: #374151; }
 .cal-cell.empty { cursor: default; }
-.cal-cell.today-cell {
-  background: #2563eb;
-  color: white;
-  font-weight: bold;
-}
-.cal-cell.today-cell:hover { background: #1d4ed8; }
-.cal-cell.has-task::after {
-  content: '';
-  display: block;
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: #f59e0b;
-  margin: 2px auto 0;
-}
+.cal-cell.today-cell { background: #2563eb; color: white; font-weight: bold; }
+.cal-cell.has-task::after { content: ''; display: block; width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; margin: 2px auto 0; }
 .cal-cell.today-cell.has-task::after { background: #fde68a; }
 .cal-cell.sun-col { color: #ef4444; }
 .cal-cell.sat-col { color: #3b82f6; }
 .dark .cal-cell.sun-col { color: #fca5a5; }
 .dark .cal-cell.sat-col { color: #93c5fd; }
-
-/* 캘린더 하단 일정 목록 */
 .cal-task-list { margin-top: 8px; }
-.cal-task-date-header {
-  font-size: 13px; font-weight: bold;
-  color: #2563eb; margin: 14px 0 6px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #dbeafe;
-}
+.cal-task-date-header { font-size: 13px; font-weight: bold; color: #2563eb; margin: 14px 0 6px; padding-bottom: 4px; border-bottom: 1px solid #dbeafe; }
 .dark .cal-task-date-header { color: #93c5fd; border-bottom-color: #1e3a5f; }
-
-.cal-task-item {
-  background: #f3f4f6; border-radius: 10px;
-  padding: 10px 12px; margin-bottom: 8px;
-  font-size: 13px; transition: 0.3s;
-}
+.cal-task-item { background: #f3f4f6; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
 .dark .cal-task-item { background: #374151; }
 .cal-task-item.done-item { opacity: 0.5; text-decoration: line-through; }
-
-.selected-cell {
-  background: #dbeafe !important;
-  color: #1d4ed8 !important;
-}
+.selected-cell { background: #dbeafe !important; color: #1d4ed8 !important; }
 .dark .selected-cell { background: #1e3a5f !important; color: #93c5fd !important; }
 
+/* ── 메신저 ── */
+.chat-room-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.chat-room-item {
+  background: #f3f4f6; border-radius: 14px; padding: 14px 16px;
+  cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px;
+}
+.dark .chat-room-item { background: #374151; }
+.chat-room-item:hover { background: #e0e7ff; }
+.dark .chat-room-item:hover { background: #4b5563; }
+.chat-room-icon { font-size: 24px; }
+.chat-room-info { flex: 1; }
+.chat-room-name { font-weight: bold; font-size: 15px; }
+.chat-room-preview { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.dark .chat-room-preview { color: #9ca3af; }
+
+.chat-window { display: none; flex-direction: column; height: calc(100vh - 200px); }
+.chat-window.active { display: flex; }
+.chat-back-btn {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: bold; font-size: 15px; margin-bottom: 14px;
+  cursor: pointer; color: #2563eb;
+}
+.dark .chat-back-btn { color: #60a5fa; }
+.chat-messages {
+  flex: 1; overflow-y: auto; display: flex;
+  flex-direction: column; gap: 10px;
+  padding: 4px 0 14px;
+}
+.msg-row { display: flex; gap: 8px; align-items: flex-end; }
+.msg-row.mine { flex-direction: row-reverse; }
+.msg-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #2563eb; color: white; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; font-weight: bold; flex-shrink: 0;
+}
+.msg-bubble {
+  max-width: 70%; padding: 10px 14px; border-radius: 16px;
+  font-size: 13px; line-height: 1.5; word-break: break-word;
+  background: #f3f4f6; color: #111827;
+}
+.dark .msg-bubble { background: #374151; color: #f9fafb; }
+.msg-row.mine .msg-bubble { background: #2563eb; color: white; }
+.msg-name { font-size: 10px; color: #6b7280; margin-bottom: 2px; }
+.dark .msg-name { color: #9ca3af; }
+.msg-row.mine .msg-name { text-align: right; }
+.msg-time { font-size: 10px; color: #9ca3af; flex-shrink: 0; margin-bottom: 2px; }
+
+/* 파일 메시지 */
+.msg-file {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.15); border-radius: 10px;
+  padding: 8px 10px; margin-top: 4px; cursor: pointer;
+  text-decoration: none; color: inherit;
+}
+.msg-row:not(.mine) .msg-file { background: rgba(0,0,0,0.06); }
+.dark .msg-row:not(.mine) .msg-file { background: rgba(255,255,255,0.08); }
+.msg-file-icon { font-size: 20px; }
+.msg-file-name { font-size: 11px; word-break: break-all; }
+
+/* 이미지 메시지 */
+.msg-img { max-width: 200px; border-radius: 10px; cursor: pointer; display: block; margin-top: 4px; }
+
+.chat-input-area {
+  display: flex; gap: 8px; align-items: flex-end;
+  padding-top: 10px; border-top: 1px solid #e5e7eb;
+}
+.dark .chat-input-area { border-top-color: #374151; }
+.chat-input {
+  flex: 1; padding: 10px 14px; border-radius: 20px;
+  border: 1px solid #e5e7eb; font-size: 14px;
+  background: #f9fafb; color: #111827;
+  resize: none; min-height: 42px; max-height: 120px;
+  font-family: inherit; line-height: 1.4;
+}
+.dark .chat-input { background: #111827; color: white; border-color: #444; }
+.chat-send-btn {
+  width: 42px; height: 42px; border-radius: 50% !important;
+  padding: 0 !important; font-size: 18px !important;
+  flex-shrink: 0;
+}
+.chat-file-btn {
+  width: 42px; height: 42px; border-radius: 50% !important;
+  padding: 0 !important; font-size: 18px !important;
+  flex-shrink: 0; background: #10b981 !important;
+}
+
+/* 로딩 */
+.loading-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.9); display: flex;
+  justify-content: center; align-items: center;
+  z-index: 99999; font-size: 14px; color: #2563eb;
+  flex-direction: column; gap: 12px;
+}
+.dark .loading-overlay { background: rgba(17,24,39,0.95); color: #60a5fa; }
+.spinner {
+  width: 36px; height: 36px; border: 3px solid #e5e7eb;
+  border-top-color: #2563eb; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 이미지 뷰어 */
+#imgViewer {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+  z-index: 99998; justify-content: center; align-items: center;
+}
+#imgViewer img { max-width: 95%; max-height: 90vh; border-radius: 8px; }
+#imgViewer.open { display: flex; }
 </style>
 </head>
 
 <body class="dark">
-<div class="widget">
+
+<!-- 로딩 -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div>연결 중...</div>
+</div>
+
+<!-- 이미지 뷰어 -->
+<div id="imgViewer" onclick="this.classList.remove('open')">
+  <img id="imgViewerSrc" src="">
+</div>
+
+<!-- ── 로그인 화면 ── -->
+<div id="loginScreen" class="hidden">
+  <div class="login-logo">LEVERY</div>
+  <div class="login-sub">사내 업무 관리 시스템</div>
+  <div class="login-box">
+    <div class="login-tab">
+      <button class="active" onclick="switchLoginTab('login', this)">로그인</button>
+      <button onclick="switchLoginTab('signup', this)">회원가입</button>
+    </div>
+    <input class="login-input" id="loginEmail" type="email" placeholder="이메일">
+    <input class="login-input" id="loginName" type="text" placeholder="이름 (표시 이름)" style="display:none">
+    <input class="login-input" id="loginPw" type="password" placeholder="비밀번호">
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" onclick="doAuth()">로그인</button>
+  </div>
+</div>
+
+<!-- ── 앱 화면 ── -->
+<div id="appScreen" class="hidden">
 
   <div class="top-right">
-    <button onclick="toggleDark()">🌙</button>
-    <button onclick="toggleLang()">🌐</button>
+    <button onclick="toggleDark()" title="다크모드">🌙</button>
+    <button onclick="doLogout()" title="로그아웃">🚪</button>
   </div>
 
   <div class="logo-wrap">
-    <div class="logo" onclick="setTab('tasks',event)">LEVERY</div>
+    <div class="logo">LEVERY</div>
   </div>
+  <div class="user-info" id="userInfo"></div>
 
   <h1 id="title">업무</h1>
 
-  <!-- ── 업무 탭 ── -->
+  <!-- 업무 탭 -->
   <div id="tasks" class="section active">
     <div class="task-box">
       <input id="titleInput" placeholder="제목 입력">
       <textarea id="taskInput" placeholder="업무 내용 상세 입력"></textarea>
-
-      <!-- 날짜 선택 -->
       <div class="date-row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
         <select id="selDay"></select>
       </div>
-
       <select id="assignee">
         <option>김기호 대리</option>
         <option>양재국 팀장</option>
         <option>박도엽 주임</option>
       </select>
-      <button id="taskBtn" onclick="addTask()">업무 추가</button>
+      <button onclick="addTask()">업무 추가</button>
     </div>
     <ul id="taskList" class="list"></ul>
   </div>
 
-  <!-- ── 캘린더 탭 ── -->
+  <!-- 캘린더 탭 -->
   <div id="calendar" class="section">
     <div class="cal-header">
       <button onclick="calMove(-1)">‹</button>
@@ -381,7 +506,50 @@ button:active { transform: scale(0.95); }
     <div class="cal-task-list" id="calTaskList"></div>
   </div>
 
-  <!-- ── 연락처 탭 ── -->
+  <!-- 메신저 탭 -->
+  <div id="messenger" class="section">
+    <!-- 채팅방 목록 -->
+    <div id="chatRoomList">
+      <div class="chat-room-list">
+        <div class="chat-room-item" onclick="openChat('전체', '🏢')">
+          <div class="chat-room-icon">🏢</div>
+          <div class="chat-room-info">
+            <div class="chat-room-name">전체 채팅</div>
+            <div class="chat-room-preview" id="preview_전체">메시지 없음</div>
+          </div>
+        </div>
+        <div class="chat-room-item" onclick="openChat('업무', '📋')">
+          <div class="chat-room-icon">📋</div>
+          <div class="chat-room-info">
+            <div class="chat-room-name">업무 채팅</div>
+            <div class="chat-room-preview" id="preview_업무">메시지 없음</div>
+          </div>
+        </div>
+        <div class="chat-room-item" onclick="openChat('자유', '😄')">
+          <div class="chat-room-icon">😄</div>
+          <div class="chat-room-info">
+            <div class="chat-room-name">자유 채팅</div>
+            <div class="chat-room-preview" id="preview_자유">메시지 없음</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 채팅창 -->
+    <div id="chatWindow" class="chat-window">
+      <div class="chat-back-btn" onclick="closeChat()">← <span id="chatRoomTitle"></span></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-area">
+        <button class="chat-file-btn" onclick="document.getElementById('fileInput').click()">📎</button>
+        <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,.pdf,.xlsx,.xls,.docx,.doc,.pptx,.ppt,.zip" onchange="sendFile(this)">
+        <textarea class="chat-input" id="chatInput" placeholder="메시지 입력..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+        <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연락처 탭 -->
   <div id="contacts" class="section">
     <div class="contact-box">
       <div class="contact-row">
@@ -410,21 +578,16 @@ button:active { transform: scale(0.95); }
 </div>
 
 <!-- NAV -->
-<div class="navbar">
+<div class="navbar" id="navbar" style="display:none">
   <div class="nav-inner">
-    <button class="nav-btn active" onclick="setTab('tasks',event)">
-      📋<div id="taskTabText">업무</div>
-    </button>
-    <button class="nav-btn" onclick="setTab('calendar',event)">
-      📅<div id="calTabText">캘린더</div>
-    </button>
-    <button class="nav-btn" onclick="setTab('contacts',event)">
-      📇<div id="contactTabText">연락처</div>
-    </button>
+    <button class="nav-btn active" onclick="setTab('tasks',event)">📋<div>업무</div></button>
+    <button class="nav-btn" onclick="setTab('calendar',event)">📅<div>캘린더</div></button>
+    <button class="nav-btn" onclick="setTab('messenger',event)">💬<div>메신저</div></button>
+    <button class="nav-btn" onclick="setTab('contacts',event)">📇<div>연락처</div></button>
   </div>
 </div>
 
-<!-- TODAY POPUP MODAL -->
+<!-- TODAY POPUP -->
 <div id="todayModal" class="modal">
   <div class="modal-box" style="max-width:340px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
@@ -442,7 +605,7 @@ button:active { transform: scale(0.95); }
     <div id="confirmMsg" style="font-size:15px;margin-bottom:20px;line-height:1.6;"></div>
     <div style="display:flex;gap:10px;justify-content:center;">
       <button id="confirmYesBtn" style="background:#ef4444;flex:1;padding:10px;">삭제</button>
-      <button id="confirmNoBtn" style="background:#6b7280;flex:1;padding:10px;" onclick="closeConfirm()">취소</button>
+      <button style="background:#6b7280;flex:1;padding:10px;" onclick="closeConfirm()">취소</button>
     </div>
   </div>
 </div>
@@ -459,496 +622,559 @@ button:active { transform: scale(0.95); }
   </div>
 </div>
 
-<script>
-/* ── 커스텀 확인 모달 ── */
-let confirmCallback = null;
-function showConfirm(msg, cb) {
-  confirmCallback = cb;
-  document.getElementById('confirmMsg').innerText = msg;
-  document.getElementById('confirmModal').style.display = 'flex';
-  document.getElementById('confirmYesBtn').onclick = function(e) {
-    e.stopPropagation();
-    const fn = confirmCallback;
-    closeConfirm();
-    if (fn) fn();
-  };
-}
-function closeConfirm() {
-  document.getElementById('confirmModal').style.display = 'none';
-  confirmCallback = null;
-}
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-/* ── 기본 상태 ── */
-let lang = 'ko';
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
-let editId = null;
-
-function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
-function saveContacts() { localStorage.setItem('contacts', JSON.stringify(contacts)); }
-
-/* ── 번역 ── */
-const t = {
-  ko: { taskTitle:"업무", contactTitle:"연락처", calTitle:"캘린더", titleInput:"제목 입력", task:"업무 내용 상세 입력", taskBtn:"업무 추가", contactBtn:"연락처 저장", contactEditBtn:"연락처 수정완료", search:"검색어 입력", name:"이름", position:"직급", company:"회사명", phone:"전화번호", email:"이메일", memo:"메모" },
-  en: { taskTitle:"Work", contactTitle:"Contacts", calTitle:"Calendar", titleInput:"Title", task:"Task Details", taskBtn:"Add Task", contactBtn:"Save Contact", contactEditBtn:"Update Contact", search:"Search", name:"Name", position:"Position", company:"Company", phone:"Phone", email:"Email", memo:"Memo" }
+const firebaseConfig = {
+  apiKey: "AIzaSyC3bqUtvnYhnRwgZlzWy3gKHqW810EWF4o",
+  authDomain: "levery-manager-service.firebaseapp.com",
+  projectId: "levery-manager-service",
+  storageBucket: "levery-manager-service.firebasestorage.app",
+  messagingSenderId: "765803870458",
+  appId: "1:765803870458:web:7960ab3d4a86d672c6f143"
 };
 
-function toggleLang() {
-  lang = lang === 'ko' ? 'en' : 'ko';
-  applyLang(); renderContacts(); renderTasks(); renderCalendar();
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-function applyLang() {
-  const currentTab = document.querySelector('.section.active').id;
-  const titles = { tasks: t[lang].taskTitle, calendar: t[lang].calTitle, contacts: t[lang].contactTitle };
-  document.getElementById('title').innerText = titles[currentTab] || t[lang].taskTitle;
-  document.getElementById('titleInput').placeholder = t[lang].titleInput;
-  document.getElementById('taskInput').placeholder = t[lang].task;
-  document.getElementById('taskBtn').innerText = t[lang].taskBtn;
-  document.getElementById('searchInput').placeholder = t[lang].search;
-  document.getElementById('cName').placeholder = t[lang].name;
-  document.getElementById('cPosition').placeholder = t[lang].position;
-  document.getElementById('cCompany').placeholder = t[lang].company;
-  document.getElementById('cPhone').placeholder = t[lang].phone;
-  document.getElementById('cEmail').placeholder = t[lang].email;
-  document.getElementById('cMemo').placeholder = t[lang].memo;
-  document.getElementById('taskTabText').innerText = t[lang].taskTitle;
-  document.getElementById('calTabText').innerText = t[lang].calTitle;
-  document.getElementById('contactTabText').innerText = t[lang].contactTitle;
-  document.getElementById('contactBtn').innerText = editId ? t[lang].contactEditBtn : t[lang].contactBtn;
-}
-applyLang();
+let currentUser = null;
+let tasks = [];
+let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+let currentRoom = null;
+let chatUnsubscribe = null;
+let tasksUnsubscribe = null;
+let confirmCallback = null;
+let editContactId = null;
+let calYear, calMonth, calSelectedDate = null;
+let loginMode = 'login';
 
-function toggleDark() { document.body.classList.toggle('dark'); }
-function toggleSearchBox() { document.getElementById('searchArea').classList.toggle('active'); }
-
-function setTab(id, e) {
-  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  const titles = { tasks: t[lang].taskTitle, calendar: t[lang].calTitle, contacts: t[lang].contactTitle };
-  document.getElementById('title').innerText = titles[id] || '';
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (e) e.currentTarget.classList.add('active');
-  if (id === 'calendar') renderCalendar();
-}
-
-/* ── 날짜 셀렉트 초기화 ── */
-function initDateSelects() {
-  const now = new Date();
-  const yEl = document.getElementById('selYear');
-  const mEl = document.getElementById('selMonth');
-  const dEl = document.getElementById('selDay');
-
-  // 년도: 올해 ~ +2년
-  for (let y = now.getFullYear(); y <= now.getFullYear() + 2; y++) {
-    const o = document.createElement('option');
-    o.value = y; o.text = y + '년';
-    yEl.appendChild(o);
+/* ── 인증 상태 감지 ── */
+onAuthStateChanged(auth, user => {
+  document.getElementById('loadingOverlay').style.display = 'none';
+  if (user) {
+    currentUser = user;
+    showApp();
+  } else {
+    currentUser = null;
+    showLogin();
   }
-  // 월
-  for (let m = 1; m <= 12; m++) {
-    const o = document.createElement('option');
-    o.value = m; o.text = m + '월';
-    mEl.appendChild(o);
-  }
-  mEl.value = now.getMonth() + 1;
+});
 
-  // 일은 년/월 바뀔 때마다 갱신
-  function updateDays() {
-    const y = parseInt(yEl.value);
-    const m = parseInt(mEl.value);
-    const max = new Date(y, m, 0).getDate();
-    const prev = parseInt(dEl.value) || now.getDate();
-    dEl.innerHTML = '';
-    for (let d = 1; d <= max; d++) {
-      const o = document.createElement('option');
-      o.value = d; o.text = d + '일';
-      dEl.appendChild(o);
+function showLogin() {
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appScreen').classList.add('hidden');
+  document.getElementById('navbar').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  document.getElementById('navbar').style.display = 'flex';
+  document.getElementById('userInfo').innerText = currentUser.displayName || currentUser.email;
+  initDateSelects();
+  subscribeToTasks();
+  loadChatPreviews();
+  showTodayPopup();
+  requestNotificationPermission();
+
+  const n = new Date();
+  calYear = n.getFullYear(); calMonth = n.getMonth();
+}
+
+/* ── 로그인/회원가입 ── */
+window.switchLoginTab = function(mode, btn) {
+  loginMode = mode;
+  document.querySelectorAll('.login-tab button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('loginName').style.display = mode === 'signup' ? 'block' : 'none';
+  document.querySelector('.login-btn').innerText = mode === 'signup' ? '회원가입' : '로그인';
+  document.getElementById('loginErr').innerText = '';
+};
+
+window.doAuth = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const name = document.getElementById('loginName').value.trim();
+  const errEl = document.getElementById('loginErr');
+  errEl.innerText = '';
+  if (!email || !pw) { errEl.innerText = '이메일과 비밀번호를 입력해주세요.'; return; }
+  try {
+    if (loginMode === 'signup') {
+      if (!name) { errEl.innerText = '이름을 입력해주세요.'; return; }
+      const cred = await createUserWithEmailAndPassword(auth, email, pw);
+      await updateProfile(cred.user, { displayName: name });
+    } else {
+      await signInWithEmailAndPassword(auth, email, pw);
     }
-    dEl.value = Math.min(prev, max);
+  } catch(e) {
+    const msgs = {
+      'auth/email-already-in-use': '이미 사용 중인 이메일입니다.',
+      'auth/invalid-email': '이메일 형식이 올바르지 않습니다.',
+      'auth/weak-password': '비밀번호는 6자 이상이어야 합니다.',
+      'auth/invalid-credential': '이메일 또는 비밀번호가 틀렸습니다.',
+      'auth/user-not-found': '등록되지 않은 이메일입니다.',
+    };
+    errEl.innerText = msgs[e.code] || '오류: ' + e.message;
   }
-  yEl.addEventListener('change', updateDays);
-  mEl.addEventListener('change', updateDays);
-  updateDays();
-  dEl.value = now.getDate();
-}
-initDateSelects();
+};
 
-/* ── 선택된 날짜 가져오기 ── */
-function getSelectedDate() {
-  const y = document.getElementById('selYear').value;
-  const m = String(document.getElementById('selMonth').value).padStart(2, '0');
-  const d = String(document.getElementById('selDay').value).padStart(2, '0');
-  return `${y}-${m}-${d}`; // YYYY-MM-DD
+window.doLogout = async function() {
+  if (chatUnsubscribe) chatUnsubscribe();
+  if (tasksUnsubscribe) tasksUnsubscribe();
+  await signOut(auth);
+};
+
+/* ── 업무 (Firestore) ── */
+function subscribeToTasks() {
+  if (tasksUnsubscribe) tasksUnsubscribe();
+  const q = query(collection(db, 'tasks'), orderBy('createdAt', 'asc'));
+  tasksUnsubscribe = onSnapshot(q, snap => {
+    tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTasks();
+    if (document.querySelector('.section.active')?.id === 'calendar') renderCalendar();
+  });
 }
+
+window.addTask = async function() {
+  const title = document.getElementById('titleInput').value.trim();
+  if (!title) { alert('제목을 입력해주세요.'); return; }
+  await addDoc(collection(db, 'tasks'), {
+    title,
+    text: document.getElementById('taskInput').value,
+    assignee: document.getElementById('assignee').value,
+    date: getSelectedDate(),
+    done: false, doneAt: '',
+    createdAt: serverTimestamp(),
+    createdBy: currentUser.uid
+  });
+  document.getElementById('titleInput').value = '';
+  document.getElementById('taskInput').value = '';
+};
+
+window.toggleDone = async function(id) {
+  const task = tasks.find(x => x.id === id);
+  if (!task) return;
+  const done = !task.done;
+  await updateDoc(doc(db, 'tasks', id), {
+    done, doneAt: done ? new Date().toLocaleString() : ''
+  });
+};
+
+window.deleteTask = function(id) {
+  showConfirm('업무를 삭제할까요?', async () => {
+    await deleteDoc(doc(db, 'tasks', id));
+  });
+};
+
+window.openDetail = function(id) {
+  const task = tasks.find(x => x.id === id);
+  if (!task) return;
+  document.getElementById('dTitle').innerText = task.title;
+  document.getElementById('dText').innerText = task.text || '내용 없음';
+  document.getElementById('dAssignee').innerText = '담당자 : ' + task.assignee;
+  document.getElementById('dDate').innerText = (task.doneAt ? '완료일 : ' + task.doneAt : '진행중') + (task.date ? ' | 날짜 : ' + task.date : '');
+  document.getElementById('detailModal').style.display = 'flex';
+};
 
 function todayStr() {
   const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
 }
 
-/* ── 업무 ── */
-function addTask() {
-  const title = titleInput.value.trim();
-  if (!title) { alert('제목 입력해라'); return; }
-  tasks.push({
-    id: Date.now(), title,
-    text: taskInput.value,
-    assignee: assignee.value,
-    date: getSelectedDate(),
-    done: false, doneAt: ''
-  });
-  saveTasks();
-  titleInput.value = ''; taskInput.value = '';
-  renderTasks();
-}
-
-function toggleDone(id) {
-  let task = tasks.find(x => x.id === id);
-  if (!task) return;
-  task.done = !task.done;
-  task.doneAt = task.done ? new Date().toLocaleString() : '';
-  saveTasks(); renderTasks();
-}
-
-function deleteTask(id) {
-  showConfirm('업무를 삭제할까요?', () => {
-    tasks = tasks.filter(x => x.id !== id);
-    saveTasks(); renderTasks();
-  });
-}
-
-function openDetail(id) {
-  const task = tasks.find(x => x.id === id);
-  if (!task) return;
-  dTitle.innerText = task.title;
-  dText.innerText = task.text || '내용 없음';
-  dAssignee.innerText = '담당자 : ' + task.assignee;
-  const dateInfo = task.date ? ' | 날짜 : ' + task.date : '';
-  dDate.innerText = (task.doneAt ? '완료일 : ' + task.doneAt : '진행중') + dateInfo;
-  detailModal.style.display = 'flex';
-}
-function closeDetail() { detailModal.style.display = 'none'; }
-window.onclick = function(e) {
-  if (e.target === detailModal) closeDetail();
-  if (e.target === document.getElementById('confirmModal')) closeConfirm();
-  if (e.target === document.getElementById('todayModal')) closeTodayModal();
-};
-
-function dateBadgeClass(dateStr) {
-  if (!dateStr) return '';
+function dateBadgeClass(d) {
+  if (!d) return '';
   const today = todayStr();
-  if (dateStr === today) return 'today';
-  if (dateStr < today) return 'past';
+  if (d === today) return 'today';
+  if (d < today) return 'past';
   return '';
 }
 
 function renderTasks() {
-  taskList.innerHTML = '';
-  const today = todayStr();
-
-  // 오늘 이후 날짜 업무만 보이게 (오늘 포함), 과거는 흐리게 표시
-  [...tasks].sort((a, b) => {
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  [...tasks].sort((a,b) => {
     if (a.done !== b.done) return a.done - b.done;
-    return (a.date || '') < (b.date || '') ? -1 : 1;
+    return (a.date||'') < (b.date||'') ? -1 : 1;
   }).forEach(task => {
     const li = document.createElement('li');
     li.className = 'item';
-
-    const badgeCls = dateBadgeClass(task.date);
-    const badgeLabel = task.date
-      ? `<span class="date-badge ${badgeCls}">${task.date}</span>`
-      : '';
-
+    const bc = dateBadgeClass(task.date);
+    const badge = task.date ? `<span class="date-badge ${bc}">${task.date}</span>` : '';
     li.innerHTML = `
       <div class="task-row">
-        <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onclick="toggleDone(${task.id})">
+        <input type="checkbox" class="task-check" ${task.done?'checked':''} onclick="toggleDone('${task.id}')">
         <div class="task-main">
           <div class="task-top">
-            <div class="task-title ${task.done ? 'done' : ''}">${task.title}</div>
+            <div class="task-title ${task.done?'done':''}">${task.title}</div>
             <div class="small">/ ${task.assignee}</div>
           </div>
-          ${badgeLabel}
-          <div class="task-preview">${task.text ? task.text.replace(/\n/g, ' ') : '내용 없음'}</div>
+          ${badge}
+          <div class="task-preview">${task.text ? task.text.replace(/\n/g,' ') : '내용 없음'}</div>
           ${task.doneAt ? `<div class="small">완료 : ${task.doneAt}</div>` : ''}
         </div>
         <div class="action-buttons">
-          <button onclick="openDetail(${task.id})">보기</button>
-          <button class="delete-btn" onclick="deleteTask(${task.id})">삭제</button>
+          <button onclick="openDetail('${task.id}')">보기</button>
+          <button class="delete-btn" onclick="deleteTask('${task.id}')">삭제</button>
         </div>
       </div>`;
-    taskList.appendChild(li);
+    list.appendChild(li);
   });
 }
 
 /* ── 캘린더 ── */
-let calYear, calMonth, calSelectedDate = null;
-
-(function initCal() {
-  const n = new Date();
-  calYear = n.getFullYear();
-  calMonth = n.getMonth(); // 0-based
-})();
-
-function calMove(dir) {
+window.calMove = function(dir) {
   calMonth += dir;
   if (calMonth > 11) { calMonth = 0; calYear++; }
   if (calMonth < 0) { calMonth = 11; calYear--; }
   renderCalendar();
-}
+};
 
 function renderCalendar() {
   const grid = document.getElementById('calGrid');
   const titleEl = document.getElementById('calTitle');
-
-  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  titleEl.innerText = `${calYear}년 ${monthNames[calMonth]}`;
-
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  titleEl.innerText = `${calYear}년 ${months[calMonth]}`;
   grid.innerHTML = '';
-
-  // 요일 헤더
-  const dayLabels = ['일','월','화','수','목','금','토'];
-  const labelCls  = ['sun','','','','','','sat'];
-  dayLabels.forEach((d, i) => {
+  ['일','월','화','수','목','금','토'].forEach((d,i) => {
     const el = document.createElement('div');
-    el.className = 'cal-day-label ' + labelCls[i];
-    el.innerText = d;
-    grid.appendChild(el);
+    el.className = 'cal-day-label' + (i===0?' sun':i===6?' sat':'');
+    el.innerText = d; grid.appendChild(el);
   });
-
-  // 이번 달 일정 날짜 set
-  const taskDates = new Set(
-    tasks.filter(tk => !tk.done).map(tk => tk.date).filter(Boolean)
-  );
-
+  const taskDates = new Set(tasks.filter(t=>!t.done).map(t=>t.date).filter(Boolean));
   const today = todayStr();
   const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-
-  // 빈칸
-  for (let i = 0; i < firstDay; i++) {
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  for (let i=0;i<firstDay;i++) { const e=document.createElement('div'); e.className='cal-cell empty'; grid.appendChild(e); }
+  for (let d=1;d<=daysInMonth;d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const el = document.createElement('div');
-    el.className = 'cal-cell empty';
-    grid.appendChild(el);
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const el = document.createElement('div');
-    const dow = (firstDay + d - 1) % 7;
-
+    const dow = (firstDay+d-1)%7;
     let cls = 'cal-cell';
-    if (dateStr === today) cls += ' today-cell';
-    if (dateStr === calSelectedDate) cls += ' selected-cell';
-    if (taskDates.has(dateStr)) cls += ' has-task';
-    if (dow === 0) cls += ' sun-col';
-    if (dow === 6) cls += ' sat-col';
-
-    el.className = cls;
-    el.innerText = d;
-    el.onclick = () => selectCalDate(dateStr);
+    if (ds===today) cls+=' today-cell';
+    if (ds===calSelectedDate) cls+=' selected-cell';
+    if (taskDates.has(ds)) cls+=' has-task';
+    if (dow===0) cls+=' sun-col';
+    if (dow===6) cls+=' sat-col';
+    el.className=cls; el.innerText=d;
+    el.onclick=()=>{ calSelectedDate=calSelectedDate===ds?null:ds; renderCalendar(); };
     grid.appendChild(el);
   }
-
   renderCalTaskList();
-}
-
-function selectCalDate(dateStr) {
-  calSelectedDate = calSelectedDate === dateStr ? null : dateStr;
-  renderCalendar();
 }
 
 function renderCalTaskList() {
   const el = document.getElementById('calTaskList');
   el.innerHTML = '';
-
-  // 선택된 날짜가 있으면 그 날만, 없으면 이번 달 전체
-  let filtered;
   const prefix = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
-
-  if (calSelectedDate) {
-    filtered = tasks.filter(tk => tk.date === calSelectedDate);
-  } else {
-    filtered = tasks.filter(tk => tk.date && tk.date.startsWith(prefix));
-  }
-
-  filtered.sort((a, b) => (a.date || '') < (b.date || '') ? -1 : 1);
-
-  if (filtered.length === 0) {
-    el.innerHTML = `<div class="small" style="text-align:center;margin-top:12px;opacity:0.5">일정 없음</div>`;
-    return;
-  }
-
-  // 날짜별 그루핑
-  const grouped = {};
-  filtered.forEach(tk => {
-    const key = tk.date || '날짜 미정';
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(tk);
-  });
-
-  Object.keys(grouped).sort().forEach(date => {
-    const header = document.createElement('div');
-    header.className = 'cal-task-date-header';
-    const isToday = date === todayStr();
-    header.innerText = date + (isToday ? ' (오늘)' : '');
-    el.appendChild(header);
-
-    grouped[date].forEach(tk => {
-      const item = document.createElement('div');
-      item.className = 'cal-task-item' + (tk.done ? ' done-item' : '');
-      item.innerHTML = `
-        <b>${tk.title}</b>
-        <div class="small">담당 : ${tk.assignee}</div>
-        ${tk.text ? `<div class="small">${tk.text.replace(/\n/g,' ')}</div>` : ''}
-      `;
+  const filtered = calSelectedDate
+    ? tasks.filter(t=>t.date===calSelectedDate)
+    : tasks.filter(t=>t.date&&t.date.startsWith(prefix));
+  filtered.sort((a,b)=>(a.date||'')<(b.date||'')?-1:1);
+  if (!filtered.length) { el.innerHTML='<div class="small" style="text-align:center;margin-top:12px;opacity:0.5">일정 없음</div>'; return; }
+  const grouped={};
+  filtered.forEach(t=>{ if(!grouped[t.date]) grouped[t.date]=[]; grouped[t.date].push(t); });
+  Object.keys(grouped).sort().forEach(date=>{
+    const h=document.createElement('div'); h.className='cal-task-date-header';
+    h.innerText=date+(date===todayStr()?' (오늘)':''); el.appendChild(h);
+    grouped[date].forEach(t=>{
+      const item=document.createElement('div');
+      item.className='cal-task-item'+(t.done?' done-item':'');
+      item.innerHTML=`<b>${t.title}</b><div class="small">담당 : ${t.assignee}</div>${t.text?`<div class="small">${t.text.replace(/\n/g,' ')}</div>`:''}`;
       el.appendChild(item);
     });
   });
 }
 
-/* ── 연락처 ── */
-function addContact() {
-  const name = cName.value.trim();
-  if (!name) { alert('이름 입력해라'); return; }
-  const contact = { id: editId || Date.now(), name, position: cPosition.value.trim(), company: cCompany.value.trim(), phone: cPhone.value.trim(), email: cEmail.value.trim(), memo: document.getElementById('cMemo').value.trim() };
-  if (editId) { contacts = contacts.map(c => c.id === editId ? contact : c); editId = null; }
+/* ── 메신저 ── */
+function loadChatPreviews() {
+  ['전체','업무','자유'].forEach(room => {
+    const q = query(collection(db,'chats_'+room), orderBy('createdAt','desc'));
+    onSnapshot(q, snap => {
+      const last = snap.docs[0]?.data();
+      const el = document.getElementById('preview_'+room);
+      if (el && last) el.innerText = (last.senderName||'') + ': ' + (last.text||'파일');
+    });
+  });
+}
+
+window.openChat = function(room, icon) {
+  currentRoom = room;
+  document.getElementById('chatRoomList').style.display = 'none';
+  document.getElementById('chatWindow').classList.add('active');
+  document.getElementById('chatRoomTitle').innerText = icon + ' ' + room + ' 채팅';
+  document.getElementById('title').innerText = room + ' 채팅';
+
+  if (chatUnsubscribe) chatUnsubscribe();
+  const q = query(collection(db,'chats_'+room), orderBy('createdAt','asc'));
+  chatUnsubscribe = onSnapshot(q, snap => {
+    const msgs = document.getElementById('chatMessages');
+    msgs.innerHTML = '';
+    snap.docs.forEach(d => renderMessage(d.data(), msgs));
+    msgs.scrollTop = msgs.scrollHeight;
+  });
+};
+
+window.closeChat = function() {
+  if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe=null; }
+  currentRoom = null;
+  document.getElementById('chatRoomList').style.display = 'block';
+  document.getElementById('chatWindow').classList.remove('active');
+  document.getElementById('title').innerText = '메신저';
+};
+
+function renderMessage(data, container) {
+  const isMine = data.senderId === currentUser.uid;
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (isMine?' mine':'');
+
+  const time = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
+  const initials = (data.senderName||'?').charAt(0).toUpperCase();
+
+  let content = '';
+  if (data.type === 'image') {
+    content = `<img class="msg-img" src="${data.fileUrl}" onclick="viewImage('${data.fileUrl}')">`;
+  } else if (data.type === 'file') {
+    content = `<a class="msg-file" href="${data.fileUrl}" target="_blank" download="${data.fileName}">
+      <span class="msg-file-icon">📄</span>
+      <span class="msg-file-name">${data.fileName}</span>
+    </a>`;
+  } else {
+    content = data.text || '';
+  }
+
+  row.innerHTML = `
+    ${!isMine ? `<div class="msg-avatar">${initials}</div>` : ''}
+    <div>
+      <div class="msg-name">${isMine?'나':data.senderName||''}</div>
+      <div class="msg-bubble">${content}</div>
+    </div>
+    <div class="msg-time">${time}</div>
+    ${isMine ? `<div class="msg-avatar">${initials}</div>` : ''}
+  `;
+  container.appendChild(row);
+}
+
+window.sendMessage = async function() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !currentRoom) return;
+  input.value = '';
+  await addDoc(collection(db,'chats_'+currentRoom), {
+    text, type: 'text',
+    senderId: currentUser.uid,
+    senderName: currentUser.displayName || currentUser.email,
+    createdAt: serverTimestamp()
+  });
+};
+
+window.sendFile = async function(input) {
+  const file = input.files[0];
+  if (!file || !currentRoom) return;
+  input.value = '';
+
+  const isImage = file.type.startsWith('image/');
+  const storageRef = ref(storage, `chats/${currentRoom}/${Date.now()}_${file.name}`);
+
+  try {
+    const snap = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(snap.ref);
+    await addDoc(collection(db,'chats_'+currentRoom), {
+      type: isImage ? 'image' : 'file',
+      fileUrl: url,
+      fileName: file.name,
+      text: '',
+      senderId: currentUser.uid,
+      senderName: currentUser.displayName || currentUser.email,
+      createdAt: serverTimestamp()
+    });
+  } catch(e) {
+    alert('파일 업로드 실패: ' + e.message);
+  }
+};
+
+window.viewImage = function(url) {
+  document.getElementById('imgViewerSrc').src = url;
+  document.getElementById('imgViewer').classList.add('open');
+};
+
+/* ── 연락처 (로컬) ── */
+function saveContacts() { localStorage.setItem('contacts', JSON.stringify(contacts)); }
+
+window.addContact = function() {
+  const name = document.getElementById('cName').value.trim();
+  if (!name) { alert('이름을 입력해주세요.'); return; }
+  const contact = {
+    id: editContactId || Date.now(), name,
+    position: document.getElementById('cPosition').value.trim(),
+    company: document.getElementById('cCompany').value.trim(),
+    phone: document.getElementById('cPhone').value.trim(),
+    email: document.getElementById('cEmail').value.trim(),
+    memo: document.getElementById('cMemo').value.trim()
+  };
+  if (editContactId) { contacts = contacts.map(c=>c.id===editContactId?contact:c); editContactId=null; }
   else { contacts.push(contact); }
   saveContacts();
-  cName.value = ''; cPosition.value = ''; cCompany.value = ''; cPhone.value = ''; cEmail.value = '';
-  document.getElementById('cMemo').value = '';
-  document.getElementById('contactBtn').innerText = t[lang].contactBtn;
+  ['cName','cPosition','cCompany','cPhone','cEmail','cMemo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('contactBtn').innerText = '연락처 저장';
   renderContacts();
-}
+};
 
-function editContact(id) {
-  const c = contacts.find(x => x.id === id);
-  if (!c) return;
-  cName.value = c.name || ''; cPosition.value = c.position || ''; cCompany.value = c.company || '';
-  cPhone.value = c.phone || ''; cEmail.value = c.email || '';
-  document.getElementById('cMemo').value = c.memo || '';
-  editId = id;
-  document.getElementById('contactBtn').innerText = t[lang].contactEditBtn;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+window.editContact = function(id) {
+  const c = contacts.find(x=>x.id===id); if(!c) return;
+  document.getElementById('cName').value=c.name||'';
+  document.getElementById('cPosition').value=c.position||'';
+  document.getElementById('cCompany').value=c.company||'';
+  document.getElementById('cPhone').value=c.phone||'';
+  document.getElementById('cEmail').value=c.email||'';
+  document.getElementById('cMemo').value=c.memo||'';
+  editContactId=id;
+  document.getElementById('contactBtn').innerText='연락처 수정완료';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
 
-function deleteContact(id) {
-  showConfirm('연락처를 삭제할까요?', () => {
-    contacts = contacts.filter(c => c.id !== id);
+window.deleteContact = function(id) {
+  showConfirm('연락처를 삭제할까요?', ()=>{
+    contacts=contacts.filter(c=>c.id!==id);
     saveContacts(); renderContacts();
   });
-}
+};
 
-function saveToPhone(contact) {
-  const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${contact.name}\nORG:${contact.company}\nTITLE:${contact.position}\nTEL:${contact.phone}\nEMAIL:${contact.email}\nNOTE:${contact.memo}\nEND:VCARD`;
-  const blob = new Blob([vcard], { type: 'text/vcard' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = `${contact.name}.vcf`; a.click();
-}
+window.saveToPhone = function(contact) {
+  const vcard=`BEGIN:VCARD\nVERSION:3.0\nFN:${contact.name}\nORG:${contact.company}\nTITLE:${contact.position}\nTEL:${contact.phone}\nEMAIL:${contact.email}\nNOTE:${contact.memo}\nEND:VCARD`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([vcard],{type:'text/vcard'}));
+  a.download=`${contact.name}.vcf`; a.click();
+};
 
 function renderContacts() {
-  contactList.innerHTML = '';
-  const keyword = (searchInput.value || '').toLowerCase();
-  const type = searchType.value;
-  contacts.filter(c => !keyword || (c[type] || '').toLowerCase().includes(keyword))
-    .slice().reverse().forEach(c => {
-      const li = document.createElement('li');
-      li.className = 'item';
-      li.innerHTML = `
-        <div class="task-row">
-          <div class="task-main">
-            <b>${c.name}</b>
-            <div class="small">${c.position || '-'}</div>
-            <div class="small">${c.company || '-'}</div>
-            <div class="small"><a class="phone-link" href="tel:${c.phone}">${c.phone || '-'}</a></div>
-            <div class="small"><a class="email-link" href="mailto:${c.email}">${c.email || '-'}</a></div>
-            <div class="small">${(c.memo || '-').replace(/\n/g, '<br>')}</div>
-          </div>
-          <div class="action-buttons">
-            <button class="edit-btn" onclick="editContact(${c.id})">수정</button>
-            <button class="save-contact-btn" onclick='saveToPhone(${JSON.stringify(c)})'>저장</button>
-            <button class="delete-btn" onclick="deleteContact(${c.id})">삭제</button>
-          </div>
-        </div>`;
-      contactList.appendChild(li);
-    });
+  const list = document.getElementById('contactList'); list.innerHTML='';
+  const keyword=(document.getElementById('searchInput').value||'').toLowerCase();
+  const type=document.getElementById('searchType').value;
+  contacts.filter(c=>!keyword||(c[type]||'').toLowerCase().includes(keyword)).slice().reverse().forEach(c=>{
+    const li=document.createElement('li'); li.className='item';
+    li.innerHTML=`
+      <div class="task-row">
+        <div class="task-main">
+          <b>${c.name}</b>
+          <div class="small">${c.position||'-'}</div>
+          <div class="small">${c.company||'-'}</div>
+          <div class="small"><a class="phone-link" href="tel:${c.phone}">${c.phone||'-'}</a></div>
+          <div class="small"><a class="email-link" href="mailto:${c.email}">${c.email||'-'}</a></div>
+          <div class="small">${(c.memo||'-').replace(/\n/g,'<br>')}</div>
+        </div>
+        <div class="action-buttons">
+          <button class="edit-btn" onclick="editContact(${c.id})">수정</button>
+          <button class="save-contact-btn" onclick='saveToPhone(${JSON.stringify(c)})'>저장</button>
+          <button class="delete-btn" onclick="deleteContact(${c.id})">삭제</button>
+        </div>
+      </div>`;
+    list.appendChild(li);
+  });
 }
 
-renderTasks();
-renderContacts();
-
-/* ── 서비스워커 등록 ── */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(reg => console.log('SW 등록됨', reg))
-    .catch(err => console.log('SW 실패', err));
+/* ── 날짜 셀렉트 ── */
+function initDateSelects() {
+  const now=new Date();
+  const yEl=document.getElementById('selYear');
+  const mEl=document.getElementById('selMonth');
+  const dEl=document.getElementById('selDay');
+  yEl.innerHTML=''; mEl.innerHTML='';
+  for(let y=now.getFullYear();y<=now.getFullYear()+2;y++){
+    const o=document.createElement('option'); o.value=y; o.text=y+'년'; yEl.appendChild(o);
+  }
+  for(let m=1;m<=12;m++){
+    const o=document.createElement('option'); o.value=m; o.text=m+'월'; mEl.appendChild(o);
+  }
+  mEl.value=now.getMonth()+1;
+  function updateDays(){
+    const y=parseInt(yEl.value), m=parseInt(mEl.value);
+    const max=new Date(y,m,0).getDate(), prev=parseInt(dEl.value)||now.getDate();
+    dEl.innerHTML='';
+    for(let d=1;d<=max;d++){const o=document.createElement('option');o.value=d;o.text=d+'일';dEl.appendChild(o);}
+    dEl.value=Math.min(prev,max);
+  }
+  yEl.addEventListener('change',updateDays); mEl.addEventListener('change',updateDays);
+  updateDays(); dEl.value=now.getDate();
 }
 
+function getSelectedDate(){
+  const y=document.getElementById('selYear').value;
+  const m=String(document.getElementById('selMonth').value).padStart(2,'0');
+  const d=String(document.getElementById('selDay').value).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
 
-/* ── 오늘 일정 팝업 ── */
+/* ── 오늘 팝업 ── */
 function showTodayPopup() {
-  const today = todayStr();
-  const todayTasks = tasks.filter(tk => tk.date === today && !tk.done);
-  if (todayTasks.length === 0) return;
-
-  const listEl = document.getElementById('todayModalList');
-  listEl.innerHTML = '';
-  todayTasks.forEach(tk => {
-    const div = document.createElement('div');
-    div.style.cssText = 'background:#f3f4f6;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;';
-    div.innerHTML = `<b>${tk.title}</b><div style="font-size:11px;color:#6b7280;margin-top:3px;">담당 : ${tk.assignee}</div>`;
-    listEl.appendChild(div);
-  });
-
-  document.getElementById('todayModalTitle').innerText = '오늘 업무 ' + todayTasks.length + '건';
-  document.getElementById('todayModal').style.display = 'flex';
+  setTimeout(()=>{
+    const today=todayStr();
+    const todayTasks=tasks.filter(t=>t.date===today&&!t.done);
+    if(!todayTasks.length) return;
+    const listEl=document.getElementById('todayModalList'); listEl.innerHTML='';
+    todayTasks.forEach(t=>{
+      const div=document.createElement('div');
+      div.style.cssText='background:#f3f4f6;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;';
+      div.innerHTML=`<b>${t.title}</b><div style="font-size:11px;color:#6b7280;margin-top:3px;">담당 : ${t.assignee}</div>`;
+      listEl.appendChild(div);
+    });
+    document.getElementById('todayModalTitle').innerText='오늘 업무 '+todayTasks.length+'건';
+    document.getElementById('todayModal').style.display='flex';
+  }, 1500);
 }
 
-function closeTodayModal() {
-  document.getElementById('todayModal').style.display = 'none';
+window.closeTodayModal=function(){ document.getElementById('todayModal').style.display='none'; };
+
+/* ── 알림 ── */
+function requestNotificationPermission(){
+  if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
 }
 
-/* ── 브라우저 알림 ── */
-function requestNotificationPermission() {
-  if (!('Notification' in window)) return;
-  if (Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
+/* ── 확인 모달 ── */
+function showConfirm(msg, cb) {
+  confirmCallback=cb;
+  document.getElementById('confirmMsg').innerText=msg;
+  document.getElementById('confirmModal').style.display='flex';
+  document.getElementById('confirmYesBtn').onclick=function(e){
+    e.stopPropagation();
+    const fn=confirmCallback; closeConfirm(); if(fn) fn();
+  };
 }
+window.closeConfirm=function(){ document.getElementById('confirmModal').style.display='none'; confirmCallback=null; };
+window.closeDetail=function(){ document.getElementById('detailModal').style.display='none'; };
 
-function sendNotification(title, body) {
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
-  new Notification(title, {
-    body: body,
-    icon: 'https://tnsc0704-commits.github.io/levery-manager-system/icon.png'
-  });
+window.onclick=function(e){
+  if(e.target===document.getElementById('detailModal')) window.closeDetail();
+  if(e.target===document.getElementById('confirmModal')) window.closeConfirm();
+  if(e.target===document.getElementById('todayModal')) window.closeTodayModal();
+};
+
+/* ── 탭 ── */
+window.setTab=function(id,e){
+  if(id==='messenger' && currentRoom){ closeChat(); }
+  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const titles={tasks:'업무',calendar:'캘린더',messenger:'메신저',contacts:'연락처'};
+  document.getElementById('title').innerText=titles[id]||'';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(e) e.currentTarget.classList.add('active');
+  if(id==='calendar') renderCalendar();
+  if(id==='contacts') renderContacts();
+};
+
+/* ── 다크모드 ── */
+window.toggleDark=function(){ document.body.classList.toggle('dark'); };
+window.toggleSearchBox=function(){ document.getElementById('searchArea').classList.toggle('active'); };
+
+/* ── 서비스워커 ── */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
-
-function checkAndNotify() {
-  const today = todayStr();
-  const now = new Date();
-  const hhmm = now.getHours() * 60 + now.getMinutes();
-
-  const todayTasks = tasks.filter(tk => tk.date === today && !tk.done);
-  if (todayTasks.length === 0) return;
-
-  // 오전 9시 (540분) 에 알림
-  if (hhmm >= 539 && hhmm <= 541) {
-    sendNotification(
-      '📋 오늘 업무 ' + todayTasks.length + '건',
-      todayTasks.map(tk => tk.title).join(', ')
-    );
-  }
-}
-
-/* ── 앱 시작시 실행 ── */
-requestNotificationPermission();
-showTodayPopup();
-
-// 1분마다 알림 체크
-setInterval(checkAndNotify, 60000);
-
 </script>
 </body>
 </html>

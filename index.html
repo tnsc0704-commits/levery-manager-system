@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Levery Manager System</title>
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Levery">
+<link rel="manifest" href="manifest.json">
+
 <style>
 
 body {
@@ -418,6 +424,18 @@ button:active { transform: scale(0.95); }
   </div>
 </div>
 
+<!-- TODAY POPUP MODAL -->
+<div id="todayModal" class="modal">
+  <div class="modal-box" style="max-width:340px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:22px;">📅</span>
+      <h2 style="margin:0;font-size:18px;" id="todayModalTitle">오늘의 업무</h2>
+    </div>
+    <div id="todayModalList" style="max-height:300px;overflow-y:auto;"></div>
+    <button onclick="closeTodayModal()" style="width:100%;margin-top:14px;">확인</button>
+  </div>
+</div>
+
 <!-- CONFIRM MODAL -->
 <div id="confirmModal" class="modal">
   <div class="modal-box" style="max-width:300px;text-align:center;">
@@ -593,8 +611,15 @@ function toggleDone(id) {
 
 function deleteTask(id) {
   showConfirm('업무를 삭제할까요?', () => {
-    tasks = tasks.filter(x => x.id !== id);
-    saveTasks(); renderTasks();
+    // window.tasks를 명시하거나, 확실하게 let으로 선언된 배열임을 보장
+    tasks = tasks.filter(task => task.id !== id);
+    saveTasks(); 
+    renderTasks();
+    
+    // 만약 캘린더 탭에 있다면 캘린더도 갱신
+    if (document.getElementById('calendar').classList.contains('active')) {
+      renderCalendar();
+    }
   });
 }
 
@@ -852,6 +877,71 @@ function renderContacts() {
 
 renderTasks();
 renderContacts();
+
+/* ── 오늘 일정 팝업 ── */
+function showTodayPopup() {
+  const today = todayStr();
+  const todayTasks = tasks.filter(tk => tk.date === today && !tk.done);
+  if (todayTasks.length === 0) return;
+
+  const listEl = document.getElementById('todayModalList');
+  listEl.innerHTML = '';
+  todayTasks.forEach(tk => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#f3f4f6;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;';
+    div.innerHTML = `<b>${tk.title}</b><div style="font-size:11px;color:#6b7280;margin-top:3px;">담당 : ${tk.assignee}</div>`;
+    listEl.appendChild(div);
+  });
+
+  document.getElementById('todayModalTitle').innerText = '오늘 업무 ' + todayTasks.length + '건';
+  document.getElementById('todayModal').style.display = 'flex';
+}
+
+function closeTodayModal() {
+  document.getElementById('todayModal').style.display = 'none';
+}
+
+/* ── 브라우저 알림 ── */
+function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendNotification(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  new Notification(title, {
+    body: body,
+    icon: 'https://tnsc0704-commits.github.io/levery-manager-system/icon.png'
+  });
+}
+
+function checkAndNotify() {
+  const today = todayStr();
+  const now = new Date();
+  const hhmm = now.getHours() * 60 + now.getMinutes();
+
+  const todayTasks = tasks.filter(tk => tk.date === today && !tk.done);
+  if (todayTasks.length === 0) return;
+
+  // 오전 9시 (540분) 에 알림
+  if (hhmm >= 539 && hhmm <= 541) {
+    sendNotification(
+      '📋 오늘 업무 ' + todayTasks.length + '건',
+      todayTasks.map(tk => tk.title).join(', ')
+    );
+  }
+}
+
+/* ── 앱 시작시 실행 ── */
+requestNotificationPermission();
+showTodayPopup();
+
+// 1분마다 알림 체크
+setInterval(checkAndNotify, 60000);
+
 </script>
 </body>
 </html>
